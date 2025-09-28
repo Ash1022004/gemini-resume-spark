@@ -63,7 +63,7 @@ const RotatingResumePreview = () => {
             ${currentResume.color} ${currentResume.borderColor}
             w-96 h-[28rem] p-6 border shadow-2xl
             transition-all duration-700 ease-in-out
-            ${isAnimating ? 'transform rotate-[360deg] scale-95 opacity-80' : 'transform rotate-0 scale-100 opacity-100'}
+            ${isAnimating ? 'transform rotateY-180 scale-95' : 'transform rotateY-0 scale-100'}
             hover:shadow-3xl hover:scale-105
             rounded-2xl overflow-hidden
           `}
