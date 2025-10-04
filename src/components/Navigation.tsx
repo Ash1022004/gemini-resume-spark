@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { FileText, Menu, X, Zap, Users, BookOpen, LogIn, Crown } from "lucide-react";
+import { FileText, Menu, X, Zap, Users, BookOpen, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { mongoApi } from "@/services/mongoApi";
 
 interface NavigationProps {
   currentSection?: string;
@@ -11,9 +9,7 @@ interface NavigationProps {
 }
 
 const Navigation = ({ currentSection = "analyzer", onSectionChange }: NavigationProps) => {
-  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const isAuthenticated = mongoApi.isAuthenticated();
 
   const navigationItems = [
     { id: "analyzer", label: "Analyzer", icon: Zap },
@@ -65,44 +61,12 @@ const Navigation = ({ currentSection = "analyzer", onSectionChange }: Navigation
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center gap-3">
-            {isAuthenticated ? (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate("/builder")}
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Resume Builder
-                </Button>
-                <Button
-                  variant="gradient"
-                  size="sm"
-                  onClick={() => navigate("/subscribe")}
-                >
-                  <Crown className="w-4 h-4 mr-2" />
-                  Upgrade
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => navigate("/auth")}
-                >
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Sign In
-                </Button>
-                <Button 
-                  variant="gradient" 
-                  size="sm"
-                  onClick={() => navigate("/auth")}
-                >
-                  Get Started Free
-                </Button>
-              </>
-            )}
+            <Button variant="outline" size="sm">
+              Sign In
+            </Button>
+            <Button variant="gradient" size="sm">
+              Get Started Free
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -139,41 +103,8 @@ const Navigation = ({ currentSection = "analyzer", onSectionChange }: Navigation
                 );
               })}
               <div className="pt-4 border-t border-border/50 flex flex-col gap-2">
-                {isAuthenticated ? (
-                  <>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => navigate("/builder")}
-                    >
-                      Resume Builder
-                    </Button>
-                    <Button 
-                      variant="gradient" 
-                      size="sm"
-                      onClick={() => navigate("/subscribe")}
-                    >
-                      Upgrade
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => navigate("/auth")}
-                    >
-                      Sign In
-                    </Button>
-                    <Button 
-                      variant="gradient" 
-                      size="sm"
-                      onClick={() => navigate("/auth")}
-                    >
-                      Get Started Free
-                    </Button>
-                  </>
-                )}
+                <Button variant="outline" size="sm">Sign In</Button>
+                <Button variant="gradient" size="sm">Get Started Free</Button>
               </div>
             </div>
           </div>
