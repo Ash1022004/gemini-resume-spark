@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/hooks/use-toast";
 import { 
   FileText, 
   Download, 
@@ -17,8 +19,25 @@ import {
 } from "lucide-react";
 
 const ResumeTemplates = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+
+  const handlePreview = (template: any) => {
+    toast({
+      title: "Preview Opening",
+      description: `Opening preview for ${template.name}`,
+    });
+    // You can implement a modal or navigate to a preview page
+  };
+
+  const handleUseTemplate = (template: any) => {
+    toast({
+      title: "Template Selected",
+      description: `${template.name} has been loaded. Redirecting to resume builder...`,
+    });
+    navigate("/builder", { state: { template } });
+  };
 
   const templates = [
     {
@@ -157,11 +176,11 @@ const ResumeTemplates = () => {
               
               {/* Overlay Actions */}
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                <Button size="sm" variant="secondary">
+                <Button size="sm" variant="secondary" onClick={() => handlePreview(template)}>
                   <Eye className="w-4 h-4 mr-2" />
                   Preview
                 </Button>
-                <Button size="sm" variant="gradient">
+                <Button size="sm" variant="gradient" onClick={() => handleUseTemplate(template)}>
                   <Download className="w-4 h-4 mr-2" />
                   Use Template
                 </Button>
@@ -187,11 +206,11 @@ const ResumeTemplates = () => {
               </div>
 
               <div className="flex gap-2 pt-2">
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => handlePreview(template)}>
                   <Eye className="w-4 h-4 mr-2" />
                   Preview
                 </Button>
-                <Button variant="gradient" size="sm" className="flex-1">
+                <Button variant="gradient" size="sm" className="flex-1" onClick={() => handleUseTemplate(template)}>
                   <Download className="w-4 h-4 mr-2" />
                   Use Template
                 </Button>

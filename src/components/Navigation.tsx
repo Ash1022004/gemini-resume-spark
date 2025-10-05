@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { FileText, Menu, X, Zap, Users, BookOpen, LogIn, Crown } from "lucide-react";
+import { FileText, Menu, X, Zap, Users, BookOpen, LogIn, Crown, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { mongoApi } from "@/services/mongoApi";
+import { toast } from "@/hooks/use-toast";
 
 interface NavigationProps {
   currentSection?: string;
@@ -24,6 +25,16 @@ const Navigation = ({ currentSection = "analyzer", onSectionChange }: Navigation
 
   const handleSectionChange = (sectionId: string) => {
     onSectionChange?.(sectionId);
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleLogout = async () => {
+    await mongoApi.signout();
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of your account",
+    });
+    navigate("/");
     setIsMobileMenuOpen(false);
   };
 
@@ -76,12 +87,20 @@ const Navigation = ({ currentSection = "analyzer", onSectionChange }: Navigation
                   Resume Builder
                 </Button>
                 <Button
-                  variant="gradient"
+                  variant="outline"
                   size="sm"
                   onClick={() => navigate("/subscribe")}
                 >
                   <Crown className="w-4 h-4 mr-2" />
                   Upgrade
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
                 </Button>
               </>
             ) : (
@@ -146,14 +165,24 @@ const Navigation = ({ currentSection = "analyzer", onSectionChange }: Navigation
                       size="sm"
                       onClick={() => navigate("/builder")}
                     >
+                      <FileText className="w-4 h-4 mr-2" />
                       Resume Builder
                     </Button>
                     <Button 
-                      variant="gradient" 
+                      variant="outline" 
                       size="sm"
                       onClick={() => navigate("/subscribe")}
                     >
+                      <Crown className="w-4 h-4 mr-2" />
                       Upgrade
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Logout
                     </Button>
                   </>
                 ) : (

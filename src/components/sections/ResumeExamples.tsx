@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "@/hooks/use-toast";
 import { 
   FileText, 
   Download, 
@@ -19,6 +20,39 @@ import {
 
 const ResumeExamples = () => {
   const [searchTerm, setSearchTerm] = useState("");
+
+  const handleViewTransformation = (example: any) => {
+    toast({
+      title: "Opening Transformation Details",
+      description: `Viewing full details for ${example.title}`,
+    });
+    // You can implement a modal or navigate to a detailed view
+  };
+
+  const handleViewExample = (example: any) => {
+    toast({
+      title: "Opening Example",
+      description: `Viewing ${example.title}`,
+    });
+  };
+
+  const handleViewIndustry = (category: any) => {
+    toast({
+      title: "Opening Industry Examples",
+      description: `Viewing ${category.category} examples`,
+    });
+  };
+
+  const handleAnalyzeResume = (section?: string) => {
+    const analyzerSection = document.getElementById("analyzer-section");
+    if (analyzerSection) {
+      analyzerSection.scrollIntoView({ behavior: "smooth" });
+    }
+    toast({
+      title: "Ready to Analyze",
+      description: "Upload your resume to get started",
+    });
+  };
 
   const examples = {
     "before-after": [
@@ -226,7 +260,7 @@ const ResumeExamples = () => {
                   ))}
                 </div>
 
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={() => handleViewTransformation(example)}>
                   <Eye className="w-4 h-4 mr-2" />
                   View Full Transformation
                 </Button>
@@ -288,7 +322,7 @@ const ResumeExamples = () => {
                     <Download className="w-4 h-4" />
                     {example.downloads.toLocaleString()} downloads
                   </div>
-                  <Button variant="gradient" size="sm">
+                  <Button variant="gradient" size="sm" onClick={() => handleViewExample(example)}>
                     <Eye className="w-4 h-4 mr-2" />
                     View Example
                   </Button>
@@ -345,7 +379,7 @@ const ResumeExamples = () => {
                   </div>
                 </div>
 
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={() => handleViewIndustry(category)}>
                   <Eye className="w-4 h-4 mr-2" />
                   View {category.category} Examples
                 </Button>
@@ -362,7 +396,7 @@ const ResumeExamples = () => {
           See how your resume compares to these top performers. Get your personalized analysis 
           and optimization recommendations in minutes.
         </p>
-        <Button variant="gradient" size="lg">
+        <Button variant="gradient" size="lg" onClick={() => handleAnalyzeResume()}>
           <Target className="w-5 h-5 mr-2" />
           Analyze My Resume Now
         </Button>

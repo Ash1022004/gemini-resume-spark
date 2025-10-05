@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "@/hooks/use-toast";
 import { 
   BookOpen, 
   Video, 
@@ -17,6 +18,21 @@ import {
 } from "lucide-react";
 
 const Resources = () => {
+  const handleResourceClick = (item: any, action: string) => {
+    toast({
+      title: `${action} ${item.type}`,
+      description: `Opening: ${item.title}`,
+    });
+    // You can implement download, video player, or article reader functionality
+  };
+
+  const handleLearnMore = (tip: any) => {
+    toast({
+      title: "Opening Career Guide",
+      description: `Learning more about ${tip.title}`,
+    });
+  };
+
   const resourceCategories = [
     {
       title: "Resume Writing Guides",
@@ -210,7 +226,14 @@ const Resources = () => {
                       ))}
                     </div>
 
-                    <Button variant="outline" className="w-full">
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => handleResourceClick(
+                        item, 
+                        category.icon === Download ? "Downloading" : category.icon === Video ? "Playing" : "Reading"
+                      )}
+                    >
                       {category.icon === Download ? (
                         <>
                           <Download className="w-4 h-4 mr-2" />
@@ -257,7 +280,12 @@ const Resources = () => {
                   <div className="space-y-2">
                     <h3 className="font-semibold text-lg">{tip.title}</h3>
                     <p className="text-sm text-muted-foreground">{tip.description}</p>
-                    <Button variant="ghost" size="sm" className="p-0 h-auto text-primary">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="p-0 h-auto text-primary"
+                      onClick={() => handleLearnMore(tip)}
+                    >
                       Learn more →
                     </Button>
                   </div>
