@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import TemplatePreviewModal from "@/components/modals/TemplatePreviewModal";
 import { 
   FileText, 
   Download, 
@@ -22,13 +23,12 @@ const ResumeTemplates = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [previewTemplate, setPreviewTemplate] = useState<any>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const handlePreview = (template: any) => {
-    toast({
-      title: "Preview Opening",
-      description: `Opening preview for ${template.name}`,
-    });
-    // You can implement a modal or navigate to a preview page
+    setPreviewTemplate(template);
+    setIsPreviewOpen(true);
   };
 
   const handleUseTemplate = (template: any) => {
@@ -122,6 +122,12 @@ const ResumeTemplates = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
+      <TemplatePreviewModal 
+        template={previewTemplate}
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        onUseTemplate={handleUseTemplate}
+      />
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold">Professional Resume Templates</h1>

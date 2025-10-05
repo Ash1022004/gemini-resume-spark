@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
+import ExampleDetailModal from "@/components/modals/ExampleDetailModal";
 import { 
   FileText, 
   Download, 
@@ -20,20 +21,17 @@ import {
 
 const ResumeExamples = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedExample, setSelectedExample] = useState<any>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const handleViewTransformation = (example: any) => {
-    toast({
-      title: "Opening Transformation Details",
-      description: `Viewing full details for ${example.title}`,
-    });
-    // You can implement a modal or navigate to a detailed view
+    setSelectedExample(example);
+    setIsDetailModalOpen(true);
   };
 
   const handleViewExample = (example: any) => {
-    toast({
-      title: "Opening Example",
-      description: `Viewing ${example.title}`,
-    });
+    setSelectedExample(example);
+    setIsDetailModalOpen(true);
   };
 
   const handleViewIndustry = (category: any) => {
@@ -171,6 +169,11 @@ const ResumeExamples = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
+      <ExampleDetailModal 
+        example={selectedExample}
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+      />
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold">Resume Examples & Success Stories</h1>

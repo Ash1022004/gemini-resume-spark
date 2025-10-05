@@ -141,87 +141,125 @@ const ResumeBuilder = () => {
     }
   };
 
-  const handleDownload = () => {
-    // Create a simple HTML version for download
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${resumeData.personalInfo.fullName} - Resume</title>
-        <style>
-          body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-          h1 { color: #0098d9; border-bottom: 2px solid #0098d9; }
-          h2 { color: #29b89d; margin-top: 24px; }
-          .contact { margin-bottom: 20px; }
-          .section { margin-bottom: 24px; }
-          .experience, .education { margin-bottom: 16px; }
-        </style>
-      </head>
-      <body>
-        <h1>${resumeData.personalInfo.fullName}</h1>
-        <div class="contact">
-          <p>${resumeData.personalInfo.email} | ${resumeData.personalInfo.phone} | ${resumeData.personalInfo.location}</p>
-          ${resumeData.personalInfo.linkedIn ? `<p>LinkedIn: ${resumeData.personalInfo.linkedIn}</p>` : ''}
-          ${resumeData.personalInfo.website ? `<p>Website: ${resumeData.personalInfo.website}</p>` : ''}
-        </div>
-        
-        ${resumeData.summary ? `
-          <div class="section">
-            <h2>Professional Summary</h2>
-            <p>${resumeData.summary}</p>
-          </div>
-        ` : ''}
-        
-        ${resumeData.experience.length > 0 ? `
-          <div class="section">
-            <h2>Experience</h2>
-            ${resumeData.experience.map(exp => `
-              <div class="experience">
-                <h3>${exp.title} at ${exp.company}</h3>
-                <p><em>${exp.location} | ${exp.startDate} - ${exp.current ? 'Present' : exp.endDate}</em></p>
-                <p>${exp.description}</p>
-              </div>
-            `).join('')}
-          </div>
-        ` : ''}
-        
-        ${resumeData.education.length > 0 ? `
-          <div class="section">
-            <h2>Education</h2>
-            ${resumeData.education.map(edu => `
-              <div class="education">
-                <h3>${edu.degree}</h3>
-                <p>${edu.institution}, ${edu.location}</p>
-                <p>Graduated: ${edu.graduationDate}${edu.gpa ? ` | GPA: ${edu.gpa}` : ''}</p>
-              </div>
-            `).join('')}
-          </div>
-        ` : ''}
-        
-        ${resumeData.skills.length > 0 ? `
-          <div class="section">
-            <h2>Skills</h2>
-            <p>${resumeData.skills.join(', ')}</p>
-          </div>
-        ` : ''}
-      </body>
-      </html>
-    `;
+  const handleDownload = async () => {
+    try {
+      // Dynamically import jsPDF
+      const { default: jsPDF } = await import('jspdf');
+      
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.width;
+      const margin = 20;
+      const maxLineWidth = pageWidth - 2 * margin;
+      let yPosition = 20;
 
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${resumeData.personalInfo.fullName || 'resume'}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+      // Helper function to add text with word wrap
+      const addText = (text: string, fontSize: number, isBold: boolean = false, color: [number, number, number] = [0, 0, 0]) => {
+        doc.setFontSize(fontSize);
+        doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+        doc.setTextColor(color[0], color[1], color[2]);
+        const lines = doc.splitTextToSize(text, maxLineWidth);
+        lines.forEach((line: string) => {
+          if (yPosition > 280) {
+            doc.addPage();
+            yPosition = 20;
+          }
+          doc.text(line, margin, yPosition);
+          yPosition += fontSize * 0.5;
+        });
+        yPosition += 3;
+      };
 
-    toast({
-      title: "Resume Downloaded",
-      description: "Your resume has been downloaded as HTML"
-    });
+      // Name (Header)
+      addText(resumeData.personalInfo.fullName || 'Resume', 20, true, [0, 66, 151]);
+      yPosition += 2;
+
+      // Contact Info
+      const contactInfo = [
+        resumeData.personalInfo.email,
+        resumeData.personalInfo.phone,
+        resumeData.personalInfo.location
+      ].filter(Boolean).join(' | ');
+      
+      if (contactInfo) {
+        addText(contactInfo, 10);
+      }
+
+      if (resumeData.personalInfo.linkedIn) {
+        addText(`LinkedIn: ${resumeData.personalInfo.linkedIn}`, 10);
+      }
+
+      if (resumeData.personalInfo.website) {
+        addText(`Website: ${resumeData.personalInfo.website}`, 10);
+      }
+
+      yPosition += 5;
+
+      // Professional Summary
+      if (resumeData.summary) {
+        addText('PROFESSIONAL SUMMARY', 14, true, [41, 184, 157]);
+        doc.setDrawColor(41, 184, 157);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 5;
+        addText(resumeData.summary, 10);
+        yPosition += 3;
+      }
+
+      // Experience
+      if (resumeData.experience.length > 0) {
+        addText('EXPERIENCE', 14, true, [41, 184, 157]);
+        doc.setDrawColor(41, 184, 157);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 5;
+
+        resumeData.experience.forEach((exp) => {
+          addText(`${exp.title} at ${exp.company}`, 12, true);
+          addText(`${exp.location} | ${exp.startDate} - ${exp.current ? 'Present' : exp.endDate}`, 9, false, [100, 100, 100]);
+          if (exp.description) {
+            addText(exp.description, 10);
+          }
+          yPosition += 3;
+        });
+      }
+
+      // Education
+      if (resumeData.education.length > 0) {
+        addText('EDUCATION', 14, true, [41, 184, 157]);
+        doc.setDrawColor(41, 184, 157);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 5;
+
+        resumeData.education.forEach((edu) => {
+          addText(edu.degree, 12, true);
+          addText(`${edu.institution}, ${edu.location}`, 10);
+          addText(`Graduated: ${edu.graduationDate}${edu.gpa ? ` | GPA: ${edu.gpa}` : ''}`, 9, false, [100, 100, 100]);
+          yPosition += 3;
+        });
+      }
+
+      // Skills
+      if (resumeData.skills.length > 0) {
+        addText('SKILLS', 14, true, [41, 184, 157]);
+        doc.setDrawColor(41, 184, 157);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 5;
+        addText(resumeData.skills.join(', '), 10);
+      }
+
+      // Save the PDF
+      doc.save(`${resumeData.personalInfo.fullName || 'resume'}.pdf`);
+
+      toast({
+        title: "Resume Downloaded",
+        description: "Your resume has been downloaded as PDF"
+      });
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast({
+        title: "Download Failed",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleLogout = () => {

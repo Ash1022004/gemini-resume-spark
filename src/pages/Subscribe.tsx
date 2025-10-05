@@ -23,16 +23,19 @@ const Subscribe = () => {
       const { url } = await mongoApi.createCheckoutSession('premium');
       toast({
         title: "Redirecting to Checkout",
-        description: "Please complete your payment"
+        description: "Processing your subscription request..."
       });
-      // In production, redirect to the actual checkout URL
+      
+      // In production, redirect to actual payment URL
       // window.location.href = url;
+      
+      // For demo purposes, simulate successful subscription
       setTimeout(() => {
         toast({
-          title: "Demo Mode",
-          description: "In production, you'd be redirected to payment"
+          title: "Subscription Successful!",
+          description: "Your premium features have been activated.",
         });
-        setIsLoading(false);
+        navigate("/builder");
       }, 2000);
     } catch (error) {
       toast({

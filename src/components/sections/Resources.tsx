@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
+import ResourceModal from "@/components/modals/ResourceModal";
 import { 
   BookOpen, 
   Video, 
@@ -18,12 +20,12 @@ import {
 } from "lucide-react";
 
 const Resources = () => {
+  const [selectedResource, setSelectedResource] = useState<any>(null);
+  const [isResourceModalOpen, setIsResourceModalOpen] = useState(false);
+
   const handleResourceClick = (item: any, action: string) => {
-    toast({
-      title: `${action} ${item.type}`,
-      description: `Opening: ${item.title}`,
-    });
-    // You can implement download, video player, or article reader functionality
+    setSelectedResource(item);
+    setIsResourceModalOpen(true);
   };
 
   const handleLearnMore = (tip: any) => {
@@ -150,6 +152,11 @@ const Resources = () => {
 
   return (
     <div className="space-y-12 animate-fade-in">
+      <ResourceModal 
+        resource={selectedResource}
+        isOpen={isResourceModalOpen}
+        onClose={() => setIsResourceModalOpen(false)}
+      />
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold">Career Resources & Guides</h1>

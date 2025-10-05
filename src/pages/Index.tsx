@@ -88,7 +88,7 @@ const Index = () => {
             {/* Hero Section */}
             <Header />
             
-            <div className="container mx-auto px-4">
+            <div id="analyzer-section" className="container mx-auto px-4">
               <div className="max-w-4xl mx-auto space-y-8">
                 {/* File Upload Section */}
                 <section className="space-y-6">
