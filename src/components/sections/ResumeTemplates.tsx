@@ -114,13 +114,11 @@ const ResumeTemplates = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTemplates.map((template) => (
           <Card key={template.id} className="overflow-hidden hover:shadow-lg transition-shadow group">
-            <div className="aspect-[3/4] relative overflow-hidden">
-              {/* Template Preview Image */}
-              <img 
-                src={template.preview} 
-                alt={template.name}
-                className="w-full h-full object-cover"
-              />
+            <div className="aspect-[3/4] bg-gradient-to-br from-muted/30 to-muted/50 relative overflow-hidden">
+              {/* Template Preview Placeholder */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <FileText className="w-16 h-16 text-muted-foreground/50" />
+              </div>
               
               {/* Overlay Actions */}
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
