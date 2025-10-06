@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import TemplatePreviewModal from "@/components/modals/TemplatePreviewModal";
+import { resumeTemplates } from "@/data/resumeTemplates";
 import { 
   FileText, 
   Download, 
@@ -39,68 +40,7 @@ const ResumeTemplates = () => {
     navigate("/builder", { state: { template } });
   };
 
-  const templates = [
-    {
-      id: 1,
-      name: "Professional Executive",
-      category: "business",
-      preview: "/api/placeholder/300/400",
-      description: "Clean, professional layout perfect for executive positions",
-      tags: ["ATS-Friendly", "Executive", "Corporate"],
-      color: "blue",
-      downloads: 1250
-    },
-    {
-      id: 2,
-      name: "Modern Developer",
-      category: "tech",
-      preview: "/api/placeholder/300/400",
-      description: "Tech-focused design with skills showcase section",
-      tags: ["Developer", "Modern", "Skills-Heavy"],
-      color: "green",
-      downloads: 890
-    },
-    {
-      id: 3,
-      name: "Creative Designer",
-      category: "creative",
-      preview: "/api/placeholder/300/400",
-      description: "Visually appealing layout for creative professionals",
-      tags: ["Creative", "Portfolio", "Visual"],
-      color: "purple",
-      downloads: 650
-    },
-    {
-      id: 4,
-      name: "Academic Scholar",
-      category: "academic",
-      preview: "/api/placeholder/300/400",
-      description: "Research-focused format for academic positions",
-      tags: ["Academic", "Research", "Publications"],
-      color: "indigo",
-      downloads: 430
-    },
-    {
-      id: 5,
-      name: "Healthcare Professional",
-      category: "healthcare",
-      preview: "/api/placeholder/300/400",
-      description: "Medical field optimized template",
-      tags: ["Healthcare", "Medical", "Clinical"],
-      color: "red",
-      downloads: 720
-    },
-    {
-      id: 6,
-      name: "Finance Analyst",
-      category: "finance",
-      preview: "/api/placeholder/300/400",
-      description: "Numbers-focused layout for finance roles",
-      tags: ["Finance", "Analytics", "Data"],
-      color: "emerald",
-      downloads: 580
-    }
-  ];
+  const templates = resumeTemplates;
 
   const categories = [
     { id: "all", label: "All Templates", icon: FileText },

@@ -1,19 +1,21 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { mongoApi, Resume } from "@/services/mongoApi";
+import { supabase } from "@/integrations/supabase/client";
 import { Download, Save, Plus, X, LogOut, Eye } from "lucide-react";
 
 const ResumeBuilder = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [currentResumeId, setCurrentResumeId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const [resumeData, setResumeData] = useState({
     title: "My Resume",
@@ -51,10 +53,24 @@ const ResumeBuilder = () => {
   const [newSkill, setNewSkill] = useState("");
 
   useEffect(() => {
-    if (!mongoApi.isAuthenticated()) {
-      navigate("/auth");
+    // Check authentication
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        navigate("/auth");
+      } else {
+        setUserId(session.user.id);
+      }
+    });
+
+    // Load template if passed from templates page
+    const template = location.state?.template;
+    if (template) {
+      setResumeData(prev => ({
+        ...prev,
+        title: template.name,
+      }));
     }
-  }, [navigate]);
+  }, [navigate, location]);
 
   const handleAddExperience = () => {
     setResumeData(prev => ({
@@ -118,22 +134,55 @@ const ResumeBuilder = () => {
   };
 
   const handleSaveDraft = async () => {
+    if (!userId) {
+      toast({
+        title: "Not Authenticated",
+        description: "Please log in to save your resume",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsSaving(true);
     try {
+      const resumePayload = {
+        user_id: userId,
+        title: resumeData.title,
+        personal_info: resumeData.personalInfo,
+        summary: resumeData.summary,
+        experience: resumeData.experience,
+        education: resumeData.education,
+        skills: resumeData.skills,
+        is_draft: true,
+      };
+
       if (currentResumeId) {
-        await mongoApi.updateResume(currentResumeId, { ...resumeData, isDraft: true });
+        const { error } = await supabase
+          .from('resumes')
+          .update(resumePayload)
+          .eq('id', currentResumeId);
+        
+        if (error) throw error;
       } else {
-        const newResume = await mongoApi.createResume({ ...resumeData, isDraft: true });
-        setCurrentResumeId(newResume._id);
+        const { data, error } = await supabase
+          .from('resumes')
+          .insert([resumePayload])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        setCurrentResumeId(data.id);
       }
+
       toast({
         title: "Draft Saved",
         description: "Your resume has been saved as a draft"
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Save error:', error);
       toast({
         title: "Save Failed",
-        description: "Failed to save draft",
+        description: error.message || "Failed to save draft",
         variant: "destructive"
       });
     } finally {
@@ -262,8 +311,8 @@ const ResumeBuilder = () => {
     }
   };
 
-  const handleLogout = () => {
-    mongoApi.signout();
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate("/auth");
   };
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,13 +6,22 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { mongoApi } from "@/services/mongoApi";
+import { supabase } from "@/integrations/supabase/client";
 import { FileText, LogIn, UserPlus } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate("/builder");
+      }
+    });
+  }, [navigate]);
   
   // Sign In form
   const [signInEmail, setSignInEmail] = useState("");
@@ -38,16 +47,22 @@ const Auth = () => {
 
     setIsLoading(true);
     try {
-      const { user } = await mongoApi.signin(signInEmail, signInPassword);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: signInEmail,
+        password: signInPassword,
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Welcome back!",
-        description: `Signed in as ${user.email}`
+        description: `Signed in as ${data.user.email}`
       });
       navigate("/builder");
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Sign In Failed",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description: error.message || "An error occurred",
         variant: "destructive"
       });
     } finally {
@@ -87,16 +102,28 @@ const Auth = () => {
 
     setIsLoading(true);
     try {
-      const { user } = await mongoApi.signup(signUpEmail, signUpPassword, signUpName);
+      const { data, error } = await supabase.auth.signUp({
+        email: signUpEmail,
+        password: signUpPassword,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            full_name: signUpName,
+          }
+        }
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Account Created!",
-        description: `Welcome, ${user.name}!`
+        description: `Welcome, ${signUpName}!`
       });
       navigate("/builder");
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Sign Up Failed",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description: error.message || "An error occurred",
         variant: "destructive"
       });
     } finally {
