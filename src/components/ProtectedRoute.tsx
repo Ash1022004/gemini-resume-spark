@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { mongoApi } from "@/services/mongoApi";
+import { supabase } from "@/integrations/supabase/client";
+import { Session } from "@supabase/supabase-js";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -8,14 +9,38 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const navigate = useNavigate();
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!mongoApi.isAuthenticated()) {
-      navigate("/auth");
-    }
+    // Set up auth state listener first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        setLoading(false);
+        if (!session) {
+          navigate("/auth");
+        }
+      }
+    );
+
+    // Then check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+      if (!session) {
+        navigate("/auth");
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
-  if (!mongoApi.isAuthenticated()) {
+  if (loading) {
+    return null;
+  }
+
+  if (!session) {
     return null;
   }
 
