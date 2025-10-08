@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { FileText, Menu, X, Zap, Users, BookOpen, LogIn, Crown, LogOut } from "lucide-react";
+import { FileText, Menu, X, Zap, Users, BookOpen, LogIn, Crown, LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { mongoApi } from "@/services/mongoApi";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { Session } from "@supabase/supabase-js";
 
 interface NavigationProps {
   currentSection?: string;
@@ -14,7 +15,28 @@ interface NavigationProps {
 const Navigation = ({ currentSection = "analyzer", onSectionChange }: NavigationProps) => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const isAuthenticated = mongoApi.isAuthenticated();
+  const [session, setSession] = useState<Session | null>(null);
+  const [userName, setUserName] = useState<string>("");
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+        setUserName(session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || "");
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUserName(session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || "");
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const isAuthenticated = !!session;
 
   const navigationItems = [
     { id: "analyzer", label: "Analyzer", icon: Zap },
@@ -29,7 +51,7 @@ const Navigation = ({ currentSection = "analyzer", onSectionChange }: Navigation
   };
 
   const handleLogout = async () => {
-    await mongoApi.signout();
+    await supabase.auth.signOut();
     toast({
       title: "Logged out successfully",
       description: "You have been logged out of your account",
@@ -78,8 +100,12 @@ const Navigation = ({ currentSection = "analyzer", onSectionChange }: Navigation
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-md">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">{userName}</span>
+                </div>
                 <Button
-                  variant="outline"
+                  variant="default"
                   size="sm"
                   onClick={() => navigate("/builder")}
                 >
@@ -99,8 +125,7 @@ const Navigation = ({ currentSection = "analyzer", onSectionChange }: Navigation
                   size="sm"
                   onClick={handleLogout}
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
+                  <LogOut className="w-4 h-4" />
                 </Button>
               </>
             ) : (
@@ -114,7 +139,7 @@ const Navigation = ({ currentSection = "analyzer", onSectionChange }: Navigation
                   Sign In
                 </Button>
                 <Button 
-                  variant="gradient" 
+                  variant="default" 
                   size="sm"
                   onClick={() => navigate("/auth")}
                 >
@@ -160,10 +185,17 @@ const Navigation = ({ currentSection = "analyzer", onSectionChange }: Navigation
               <div className="pt-4 border-t border-border/50 flex flex-col gap-2">
                 {isAuthenticated ? (
                   <>
+                    <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-md mb-2">
+                      <User className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">{userName}</span>
+                    </div>
                     <Button 
-                      variant="outline" 
+                      variant="default" 
                       size="sm"
-                      onClick={() => navigate("/builder")}
+                      onClick={() => {
+                        navigate("/builder");
+                        setIsMobileMenuOpen(false);
+                      }}
                     >
                       <FileText className="w-4 h-4 mr-2" />
                       Resume Builder
@@ -171,7 +203,10 @@ const Navigation = ({ currentSection = "analyzer", onSectionChange }: Navigation
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => navigate("/subscribe")}
+                      onClick={() => {
+                        navigate("/subscribe");
+                        setIsMobileMenuOpen(false);
+                      }}
                     >
                       <Crown className="w-4 h-4 mr-2" />
                       Upgrade
@@ -190,14 +225,21 @@ const Navigation = ({ currentSection = "analyzer", onSectionChange }: Navigation
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => navigate("/auth")}
+                      onClick={() => {
+                        navigate("/auth");
+                        setIsMobileMenuOpen(false);
+                      }}
                     >
+                      <LogIn className="w-4 h-4 mr-2" />
                       Sign In
                     </Button>
                     <Button 
-                      variant="gradient" 
+                      variant="default" 
                       size="sm"
-                      onClick={() => navigate("/auth")}
+                      onClick={() => {
+                        navigate("/auth");
+                        setIsMobileMenuOpen(false);
+                      }}
                     >
                       Get Started Free
                     </Button>
