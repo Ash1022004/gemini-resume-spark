@@ -1,10 +1,70 @@
-import { FileText, Zap, Target, Star } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { FileText, Zap, Target, Star, LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import { Session } from "@supabase/supabase-js";
 import RotatingResumePreview from "./RotatingResumePreview";
 
 const Header = () => {
+  const navigate = useNavigate();
+  const [session, setSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of your account",
+    });
+    navigate("/");
+  };
+
+  const handleBuildResume = () => {
+    if (session) {
+      navigate("/builder");
+    } else {
+      navigate("/auth");
+    }
+  };
+
+  const handleGetScore = () => {
+    // Scroll to analyzer section
+    document.getElementById('analyzer-section')?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'start'
+    });
+  };
+
   return (
     <header className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-20 lg:py-32">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/10"></div>
+      
+      {/* Logout button - top right */}
+      {session && (
+        <div className="absolute top-4 right-4 z-30">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-4 py-2 bg-white/90 hover:bg-white text-gray-700 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </button>
+        </div>
+      )}
       
       <div className="container relative z-10 mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -27,10 +87,16 @@ const Header = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-in animation-delay-400">
-              <button className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105 shadow-lg">
+              <button 
+                onClick={handleBuildResume}
+                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-green-600 hover:to-green-700 transition-all transform hover:scale-105 shadow-lg"
+              >
                 Build Your Resume
               </button>
-              <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg font-semibold text-lg hover:border-gray-400 hover:bg-gray-50 transition-all">
+              <button 
+                onClick={handleGetScore}
+                className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg font-semibold text-lg hover:border-gray-400 hover:bg-gray-50 transition-all"
+              >
                 Get Your Resume Score
               </button>
             </div>
