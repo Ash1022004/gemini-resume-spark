@@ -29,12 +29,10 @@ const TemplatePreviewModal = ({ template, isOpen, onClose, onUseTemplate }: Temp
 
         <div className="space-y-6">
           {/* Template Preview */}
-          <div className="aspect-[3/4] relative overflow-hidden rounded-lg border">
-            <img 
-              src={template.preview} 
-              alt={template.name}
-              className="w-full h-full object-cover"
-            />
+          <div className="aspect-[3/4] bg-gradient-to-br from-muted/30 to-muted/50 relative overflow-hidden rounded-lg border">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <FileText className="w-24 h-24 text-muted-foreground/50" />
+            </div>
             <div className="absolute top-4 right-4">
               <Badge variant="secondary">{template.category}</Badge>
             </div>
