@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResumeBuilder from "./pages/ResumeBuilder";
+import ResumeEditor from "./pages/ResumeEditor";
 import Subscribe from "./pages/Subscribe";
 import NotFound from "./pages/NotFound";
 
@@ -26,6 +27,11 @@ const App = () => (
             <Route path="/builder" element={
               <ProtectedRoute>
                 <ResumeBuilder />
+              </ProtectedRoute>
+            } />
+            <Route path="/edit-resume" element={
+              <ProtectedRoute>
+                <ResumeEditor />
               </ProtectedRoute>
             } />
             <Route path="/subscribe" element={

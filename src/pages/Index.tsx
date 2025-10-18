@@ -92,8 +92,8 @@ const Index = () => {
       return;
     }
 
-    // Navigate to builder with the file data
-    navigate("/builder", { state: { resumeFile: selectedFile } });
+    // Navigate to resume editor with the file data
+    navigate("/edit-resume", { state: { resumeFile: selectedFile } });
   };
 
   const renderSection = () => {
