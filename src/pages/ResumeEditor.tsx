@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Save, Download, ArrowLeft } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { resumeAnalyzerService } from "@/services/resumeAnalyzer";
 
 const ResumeEditor = () => {
   const location = useLocation();
@@ -53,19 +54,7 @@ const ResumeEditor = () => {
   const extractTextFromFile = async (file: File) => {
     setIsLoading(true);
     try {
-      const formData = new FormData();
-      formData.append('resume', file);
-
-      const response = await fetch('http://127.0.0.1:5001/parse', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to parse resume');
-      }
-
-      const data = await response.json();
+      const data = await resumeAnalyzerService.parseResume(file);
       setResumeContent(data.extracted_text || "");
       
       toast({
@@ -76,13 +65,9 @@ const ResumeEditor = () => {
       console.error('Error parsing resume:', error);
       toast({
         title: "Error Loading Resume",
-        description: "Unable to extract text from your resume. Please try again.",
+        description: error instanceof Error ? error.message : "Unable to extract text from your resume. Please try again.",
         variant: "destructive",
       });
-      
-      // Fallback: try to read as text
-      const text = await file.text();
-      setResumeContent(text);
     } finally {
       setIsLoading(false);
     }
