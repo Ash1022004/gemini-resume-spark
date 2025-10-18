@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
@@ -74,6 +75,25 @@ const Index = () => {
     setSelectedFile(null);
     setJobDescription("");
     setResults(null);
+  };
+
+  const handleEditResume = async () => {
+    if (!selectedFile) return;
+    
+    // Check if user is logged in
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to edit your resume.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    // Navigate to builder with the file data
+    navigate("/builder", { state: { resumeFile: selectedFile } });
   };
 
   const renderSection = () => {
@@ -167,7 +187,7 @@ const Index = () => {
                       </p>
                     </div>
                     
-                    <EnhancedAnalysisResults results={results} />
+                    <EnhancedAnalysisResults results={results} onEditResume={handleEditResume} />
                     
                     <div className="flex justify-center pt-6">
                       <Button

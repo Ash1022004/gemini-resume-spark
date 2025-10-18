@@ -70,7 +70,17 @@ const ResumeBuilder = () => {
         title: template.name,
       }));
     }
-  }, [navigate, location]);
+
+    // Check if a resume file was passed for editing
+    const resumeFile = location.state?.resumeFile;
+    if (resumeFile) {
+      toast({
+        title: "Resume Loaded",
+        description: "Your uploaded resume is ready. Fill in the fields below to create an editable version.",
+        duration: 5000,
+      });
+    }
+  }, [navigate, location, toast]);
 
   const handleAddExperience = () => {
     setResumeData(prev => ({
